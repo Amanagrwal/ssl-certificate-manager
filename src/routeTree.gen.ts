@@ -10,33 +10,63 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SslIndexRouteImport } from './routes/ssl/index'
+import { Route as SslCreateRouteImport } from './routes/ssl/create'
+import { Route as SslOrderIdRouteImport } from './routes/ssl/$orderId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SslIndexRoute = SslIndexRouteImport.update({
+  id: '/ssl/',
+  path: '/ssl/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SslCreateRoute = SslCreateRouteImport.update({
+  id: '/ssl/create',
+  path: '/ssl/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SslOrderIdRoute = SslOrderIdRouteImport.update({
+  id: '/ssl/$orderId',
+  path: '/ssl/$orderId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/ssl/$orderId': typeof SslOrderIdRoute
+  '/ssl/create': typeof SslCreateRoute
+  '/ssl/': typeof SslIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/ssl/$orderId': typeof SslOrderIdRoute
+  '/ssl/create': typeof SslCreateRoute
+  '/ssl': typeof SslIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/ssl/$orderId': typeof SslOrderIdRoute
+  '/ssl/create': typeof SslCreateRoute
+  '/ssl/': typeof SslIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/ssl/$orderId' | '/ssl/create' | '/ssl/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/ssl/$orderId' | '/ssl/create' | '/ssl'
+  id: '__root__' | '/' | '/ssl/$orderId' | '/ssl/create' | '/ssl/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  SslOrderIdRoute: typeof SslOrderIdRoute
+  SslCreateRoute: typeof SslCreateRoute
+  SslIndexRoute: typeof SslIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +78,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ssl/': {
+      id: '/ssl/'
+      path: '/ssl'
+      fullPath: '/ssl/'
+      preLoaderRoute: typeof SslIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ssl/create': {
+      id: '/ssl/create'
+      path: '/ssl/create'
+      fullPath: '/ssl/create'
+      preLoaderRoute: typeof SslCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ssl/$orderId': {
+      id: '/ssl/$orderId'
+      path: '/ssl/$orderId'
+      fullPath: '/ssl/$orderId'
+      preLoaderRoute: typeof SslOrderIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  SslOrderIdRoute: SslOrderIdRoute,
+  SslCreateRoute: SslCreateRoute,
+  SslIndexRoute: SslIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

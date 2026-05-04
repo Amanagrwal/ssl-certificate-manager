@@ -46,6 +46,10 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-ring-offset-background: var(--background);
+  --color-status-success: var(--status-success);
+  --color-status-warning: var(--status-warning);
+  --color-status-info: var(--status-info);
+  --color-status-expired: var(--status-expired);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -63,6 +67,10 @@
 
 :root {
   --radius: 0.625rem;
+  --status-success: oklch(0.55 0.18 145);
+  --status-warning: oklch(0.65 0.18 75);
+  --status-info: oklch(0.55 0.18 250);
+  --status-expired: oklch(0.6 0.18 50);
   --background: oklch(1 0 0);
   --foreground: oklch(0.129 0.042 264.695);
   --card: oklch(1 0 0);
@@ -100,6 +108,10 @@
 .dark {
   --background: oklch(0.129 0.042 264.695);
   --foreground: oklch(0.984 0.003 247.858);
+  --status-success: oklch(0.65 0.2 145);
+  --status-warning: oklch(0.72 0.18 75);
+  --status-info: oklch(0.65 0.2 250);
+  --status-expired: oklch(0.68 0.18 50);
   --card: oklch(0.208 0.042 265.755);
   --card-foreground: oklch(0.984 0.003 247.858);
   --popover: oklch(0.208 0.042 265.755);
