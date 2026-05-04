@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import {
   ArrowLeft,
   Copy,
@@ -16,8 +16,16 @@ import { StatusBadge } from "./StatusBadge";
 import { SSLTimeline } from "./SSLTimeline";
 import { ValidationInstructionCard } from "./ValidationInstructionCard";
 import { CertificateCard } from "./CertificateCard";
+import { NextRecommendedAction } from "./NextRecommendedAction";
 import { ErrorCard } from "./LoadingStates";
-import type { SSLOrder } from "@/data/ssl-mock-data";
+import { DraftActions } from "./actions/DraftActions";
+import { PaymentPendingActions } from "./actions/PaymentPendingActions";
+import { PendingValidationActions } from "./actions/PendingValidationActions";
+import { ActiveActions } from "./actions/ActiveActions";
+import { FailedActions } from "./actions/FailedActions";
+import { ExpiredActions } from "./actions/ExpiredActions";
+import { CancelledActions } from "./actions/CancelledActions";
+import type { SSLOrder, SSLStatus } from "@/data/ssl-mock-data";
 import { mockSSLOrders } from "@/data/ssl-mock-data";
 
 function DetailRow({ label, value }: { label: string; value: React.ReactNode }) {
@@ -30,13 +38,17 @@ function DetailRow({ label, value }: { label: string; value: React.ReactNode }) 
 }
 
 export function SSLOrderDetail({ orderId }: { orderId: string }) {
+  const navigate = useNavigate();
   const [csrVisible, setCsrVisible] = useState(false);
   const [copiedCsr, setCopiedCsr] = useState(false);
 
   // TODO: Replace with API call - GET /api/ssl/orders/{orderId}
-  const order = mockSSLOrders.find((o) => o.id === orderId);
+  const orderData = mockSSLOrders.find((o) => o.id === orderId);
 
-  if (!order) {
+  // Local status override for demo state transitions
+  const [statusOverride, setStatusOverride] = useState<SSLStatus | null>(null);
+
+  if (!orderData) {
     return (
       <div className="space-y-6">
         <Link to="/ssl">
@@ -49,6 +61,21 @@ export function SSLOrderDetail({ orderId }: { orderId: string }) {
       </div>
     );
   }
+
+  // Use override status for demo, fallback to real status
+  const order: SSLOrder = statusOverride
+    ? { ...orderData, status: statusOverride }
+    : orderData;
+
+  const handleStatusChange = (newStatus: SSLStatus) => {
+    // TODO: Replace with API call to update status
+    setStatusOverride(newStatus);
+  };
+
+  const handleDeleteDraft = () => {
+    // TODO: Connect Delete Draft API - DELETE /api/ssl/orders/{id}
+    navigate({ to: "/ssl" });
+  };
 
   const handleCopyCsr = () => {
     if (order.csr) {
@@ -78,18 +105,46 @@ export function SSLOrderDetail({ orderId }: { orderId: string }) {
         </div>
       </div>
 
-      {/* Timeline */}
-      <Card>
-        <CardContent className="pt-6">
-          <SSLTimeline status={order.status} />
-        </CardContent>
-      </Card>
+      {/* Next Recommended Action */}
+      <NextRecommendedAction status={order.status} />
 
-      {/* Validation Instructions */}
-      <ValidationInstructionCard order={order} />
+      {/* Timeline (hide for cancelled) */}
+      {order.status !== "cancelled" && (
+        <Card>
+          <CardContent className="pt-6">
+            <SSLTimeline status={order.status} />
+          </CardContent>
+        </Card>
+      )}
 
-      {/* Certificate (for active) */}
-      <CertificateCard order={order} />
+      {/* Status-specific action sections */}
+      {order.status === "draft" && (
+        <DraftActions order={order} onDelete={handleDeleteDraft} />
+      )}
+      {order.status === "payment_pending" && (
+        <PaymentPendingActions order={order} onStatusChange={handleStatusChange} />
+      )}
+      {order.status === "pending_validation" && (
+        <>
+          <ValidationInstructionCard order={order} />
+          <PendingValidationActions onStatusChange={handleStatusChange} />
+        </>
+      )}
+      {order.status === "active" && (
+        <>
+          <CertificateCard order={order} />
+          <ActiveActions order={order} />
+        </>
+      )}
+      {order.status === "failed" && (
+        <FailedActions order={order} onStatusChange={handleStatusChange} />
+      )}
+      {order.status === "expired" && (
+        <ExpiredActions order={order} />
+      )}
+      {order.status === "cancelled" && (
+        <CancelledActions order={order} />
+      )}
 
       {/* Info Cards Grid */}
       <div className="grid gap-6 lg:grid-cols-2">
