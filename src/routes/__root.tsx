@@ -29,14 +29,18 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "ssl" },
+      { name: "description", content: "Manages SSL certificate orders with a professional React frontend, featuring order listing, creation, and detailed views." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "ssl" },
+      { property: "og:description", content: "Manages SSL certificate orders with a professional React frontend, featuring order listing, creation, and detailed views." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "ssl" },
+      { name: "twitter:description", content: "Manages SSL certificate orders with a professional React frontend, featuring order listing, creation, and detailed views." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/5149aa9c-96e8-4e1a-8f3d-0a14ee99bced/id-preview-34d26b30--ac2d48e2-c551-4516-bf8c-c4c9eb8bd6da.lovable.app-1777873517237.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/5149aa9c-96e8-4e1a-8f3d-0a14ee99bced/id-preview-34d26b30--ac2d48e2-c551-4516-bf8c-c4c9eb8bd6da.lovable.app-1777873517237.png" },
     ],
     links: [
       {
