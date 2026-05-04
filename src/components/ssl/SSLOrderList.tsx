@@ -24,6 +24,7 @@ const STATUS_FILTERS: { value: string; label: string }[] = [
   { value: "active", label: "Active" },
   { value: "failed", label: "Failed" },
   { value: "expired", label: "Expired" },
+  { value: "cancelled", label: "Cancelled" },
 ];
 
 export function SSLOrderList() {

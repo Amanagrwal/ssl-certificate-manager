@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "@tanstack/react-router";
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { SuccessMessage } from "./LoadingStates";
+import { mockSSLOrders } from "@/data/ssl-mock-data";
 
 interface FormData {
   domain: string;
@@ -43,11 +44,43 @@ const initialForm: FormData = {
   country: "",
 };
 
-export function SSLOrderForm() {
+interface SSLOrderFormProps {
+  editOrderId?: string;
+  renewOrderId?: string;
+}
+
+export function SSLOrderForm({ editOrderId, renewOrderId }: SSLOrderFormProps) {
   const navigate = useNavigate();
   const [form, setForm] = useState<FormData>(initialForm);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  const isEdit = !!editOrderId;
+  const isRenew = !!renewOrderId;
+  const prefillId = editOrderId || renewOrderId;
+
+  // Pre-fill form when editing or renewing
+  useEffect(() => {
+    if (prefillId) {
+      // TODO: Replace with API call - GET /api/ssl/orders/{id}
+      const order = mockSSLOrders.find((o) => o.id === prefillId);
+      if (order) {
+        setForm({
+          domain: order.domain,
+          sslType: order.sslType,
+          validity: order.validity,
+          validationMethod: order.validationMethod,
+          contactName: order.contactName,
+          contactEmail: order.contactEmail,
+          contactPhone: order.contactPhone,
+          organization: order.organization,
+          city: order.city || "",
+          state: order.state || "",
+          country: order.country || "",
+        });
+      }
+    }
+  }, [prefillId]);
 
   const update = (field: keyof FormData, value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -56,16 +89,42 @@ export function SSLOrderForm() {
     e.preventDefault();
     setSubmitting(true);
 
-    // TODO: Replace with API call - POST /api/ssl/orders
-    // Simulate API delay
+    // TODO: Replace with API call
+    // Edit: PUT /api/ssl/orders/{id}
+    // Renew: POST /api/ssl/orders/{id}/renew
+    // Create: POST /api/ssl/orders
     await new Promise((r) => setTimeout(r, 1000));
 
     setSuccess(true);
     setTimeout(() => {
-      // Navigate to the newly created order (using first mock order as placeholder)
-      navigate({ to: "/ssl/$orderId", params: { orderId: "SSL-1001" } });
+      const targetId = prefillId || "SSL-1001";
+      navigate({ to: "/ssl/$orderId", params: { orderId: targetId } });
     }, 1500);
   };
+
+  const pageTitle = isRenew
+    ? "Renew SSL Certificate"
+    : isEdit
+      ? "Edit SSL Order"
+      : "Create SSL Order";
+
+  const pageDescription = isRenew
+    ? "Renew your SSL certificate with existing details pre-filled"
+    : isEdit
+      ? "Update the details for your SSL certificate order"
+      : "Fill in the details to order a new SSL certificate";
+
+  const submitLabel = isRenew
+    ? "Renew SSL Certificate"
+    : isEdit
+      ? "Continue to Payment"
+      : "Create SSL Order";
+
+  const successMessage = isRenew
+    ? "SSL renewal order created successfully! Redirecting..."
+    : isEdit
+      ? "SSL order updated successfully! Redirecting..."
+      : "SSL order created successfully! Redirecting...";
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
@@ -77,12 +136,12 @@ export function SSLOrderForm() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Create SSL Order</h1>
-          <p className="text-sm text-muted-foreground">Fill in the details to order a new SSL certificate</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">{pageTitle}</h1>
+          <p className="text-sm text-muted-foreground">{pageDescription}</p>
         </div>
       </div>
 
-      {success && <SuccessMessage message="SSL order created successfully! Redirecting..." />}
+      {success && <SuccessMessage message={successMessage} />}
 
       <form onSubmit={handleSubmit}>
         {/* SSL Details */}
@@ -100,7 +159,13 @@ export function SSLOrderForm() {
                 value={form.domain}
                 onChange={(e) => update("domain", e.target.value)}
                 required
+                disabled={isRenew}
               />
+              {isRenew && (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Domain cannot be changed during renewal.
+                </p>
+              )}
             </div>
             <div>
               <Label>SSL Type</Label>
@@ -182,7 +247,7 @@ export function SSLOrderForm() {
             <Button type="button" variant="outline">Cancel</Button>
           </Link>
           <Button type="submit" disabled={submitting}>
-            {submitting ? "Creating..." : "Create SSL Order"}
+            {submitting ? "Processing..." : submitLabel}
           </Button>
         </div>
       </form>

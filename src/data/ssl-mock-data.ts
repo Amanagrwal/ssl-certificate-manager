@@ -7,7 +7,8 @@ export type SSLStatus =
   | "pending_validation"
   | "active"
   | "failed"
-  | "expired";
+  | "expired"
+  | "cancelled";
 
 export type SSLType = "DV SSL" | "OV SSL" | "EV SSL" | "Wildcard SSL";
 export type Validity = "1 Year" | "2 Years";
@@ -40,6 +41,8 @@ export interface SSLOrder {
   csrGenerated?: boolean;
   csr?: string;
   certificate?: string;
+  failureReason?: string;
+  cancelledAt?: string;
 }
 
 export const SSL_STATUS_CONFIG: Record<
@@ -52,6 +55,48 @@ export const SSL_STATUS_CONFIG: Record<
   active: { label: "Active", color: "green" },
   failed: { label: "Failed", color: "red" },
   expired: { label: "Expired", color: "orange" },
+  cancelled: { label: "Cancelled", color: "gray" },
+};
+
+export const NEXT_ACTION_CONFIG: Record<
+  SSLStatus,
+  { title: string; description: string; icon: string }
+> = {
+  draft: {
+    title: "Complete your SSL order",
+    description: "This SSL order is incomplete. Please complete the required details to continue.",
+    icon: "edit",
+  },
+  payment_pending: {
+    title: "Complete payment",
+    description: "Payment is pending for this SSL order. Complete payment to proceed.",
+    icon: "credit-card",
+  },
+  pending_validation: {
+    title: "Add DNS record and check validation",
+    description: "Domain ownership verification is pending. Add the required DNS record and verify.",
+    icon: "shield-check",
+  },
+  active: {
+    title: "Download or renew certificate",
+    description: "Your SSL certificate is active. Download it or plan for renewal.",
+    icon: "download",
+  },
+  failed: {
+    title: "Fix issue and retry",
+    description: "This SSL order has failed. Review the error and retry validation.",
+    icon: "alert-triangle",
+  },
+  expired: {
+    title: "Renew certificate",
+    description: "Your SSL certificate has expired. Renew it to keep your domain secure.",
+    icon: "clock",
+  },
+  cancelled: {
+    title: "Create a new SSL order",
+    description: "This order was cancelled. You can create a new SSL order for this domain.",
+    icon: "plus",
+  },
 };
 
 export const TIMELINE_STEPS = [
@@ -70,6 +115,7 @@ export const STATUS_TO_STEP: Record<SSLStatus, number> = {
   active: 5,
   failed: 3,
   expired: 5,
+  cancelled: -1,
 };
 
 export const mockSSLOrders: SSLOrder[] = [
@@ -178,6 +224,7 @@ export const mockSSLOrders: SSLOrder[] = [
     state: "Gujarat",
     country: "India",
     csrGenerated: true,
+    failureReason: "DNS record not found. The CNAME record for domain validation was not detected after multiple attempts.",
   },
   {
     id: "SSL-1006",
@@ -197,5 +244,25 @@ export const mockSSLOrders: SSLOrder[] = [
     state: "Telangana",
     country: "India",
     csrGenerated: false,
+  },
+  {
+    id: "SSL-1007",
+    domain: "cancelled-project.com",
+    sslType: "DV SSL",
+    validity: "1 Year",
+    validationMethod: "DNS Validation",
+    status: "cancelled",
+    providerOrderId: "PROV-88996",
+    createdAt: "2026-04-20",
+    expiresAt: null,
+    contactName: "Sanjay Mehta",
+    contactEmail: "sanjay@cancelled-project.com",
+    contactPhone: "+91 3333333333",
+    organization: "Cancelled Project Ltd",
+    city: "Chennai",
+    state: "Tamil Nadu",
+    country: "India",
+    csrGenerated: false,
+    cancelledAt: "2026-04-25",
   },
 ];
